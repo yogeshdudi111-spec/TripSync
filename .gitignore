@@ -13,3 +13,9 @@ backend/node_modules/
 
 # OS generated files
 .DS_Store
+# Ignore node_modules inside the backend folder
+backend/node_modules/
+
+# Ignore sqlite databases inside the backend folder
+backend/*.sqlite
+backend/*.db

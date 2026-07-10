@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TripSync - My Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .profile-container {
+            display: grid;
+            grid-template-columns: 1.8fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+        .trust-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+            border-radius: 2rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        .trust-badge-verified {
+            background: rgba(15, 118, 110, 0.1);
+            color: var(--primary);
+            padding: 0.6rem 1.25rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            font-size: 0.95rem;
+            border: 1px dashed rgba(15, 118, 110, 0.4);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .trust-badge-unverified {
+            background: rgba(185, 28, 28, 0.08);
+            color: var(--danger);
+            padding: 0.6rem 1.25rem;
+            border-radius: 2rem;
+            font-weight: bold;
+            font-size: 0.95rem;
+            border: 1px dashed rgba(185, 28, 28, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .trust-score-circle {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 1.5rem 0 0.5rem 0;
+        }
+        .trust-score-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1.5rem;
+        }
+        .trust-score-bar-wrapper {
+            background: rgba(15, 118, 110, 0.08);
+            height: 12px;
+            border-radius: 1rem;
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(13, 148, 136, 0.15);
+        }
+        .trust-score-bar-fill {
+            background: linear-gradient(90deg, var(--primary), #0ea5e9);
+            height: 100%;
+            width: 65%;
+            transition: width 0.8s ease-in-out;
+        }
+        .profile-form-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+            border-radius: 2rem;
+            box-shadow: var(--shadow);
+        }
+        .privacy-notice {
+            background: rgba(15, 118, 110, 0.04);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            margin-top: 1.5rem;
+            border-left: 4px solid var(--primary);
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+        @media (max-width: 1024px) {
+            .profile-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <div class="sidebar-nav">
+            <div class="brand" onclick="window.location.href='dashboard.html'">
+                <img src="logo.png" alt="Logo">
+                <h1>TripSync</h1>
+            </div>
+            
+            <div style="flex:1;">
+                <button class="btn" style="background: rgba(255,255,255,0.8); border: 1px solid var(--border); color: var(--primary); box-shadow: none;" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
+            </div>
+
+            <div class="sidebar-user">
+                <span id="userName" style="display: block; margin-bottom: 1rem; font-weight: 600; color: var(--text);"></span>
+                <button class="btn" style="background: rgba(255,255,255,0.8); border: 1px solid rgba(21, 128, 61, 0.25); color: var(--danger); box-shadow: none;" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div style="margin-bottom: 3rem;">
+                <h2 style="font-size: 3rem; font-weight: 800; line-height: 1.1; margin-bottom: 0.5rem; color: var(--primary);">Trust & Safety Profile</h2>
+                <p style="color: var(--text-muted); font-size: 1.1rem; font-weight: 500;">Manage your travel profile details and verify your identity to show teammates you are trustworthy.</p>
+            </div>
+
+            <div class="profile-container">
+                <!-- Left Column: Edit Form -->
+                <div class="profile-form-card">
+                    <h3 style="margin-bottom: 1.5rem; color: var(--primary); font-size: 1.5rem;">Personal Details</h3>
+                    <form id="profileForm">
+                        <div style="display: flex; gap: 1rem;">
+                            <div class="input-group" style="flex: 1;">
+                                <label>Age</label>
+                                <input type="number" id="profAge" placeholder="e.g. 25" min="1" max="120">
+                            </div>
+                            <div class="input-group" style="flex: 1;">
+                                <label>Gender</label>
+                                <select id="profGender">
+                                    <option value="">Select...</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Non-binary">Non-binary</option>
+                                    <option value="Prefer not to say">Prefer not to say</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Phone Number</label>
+                            <input type="text" id="profPhone" placeholder="e.g. +91 98765 43210">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Residence / Current City</label>
+                            <input type="text" id="profResidence" placeholder="e.g. New Delhi, India">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Short Bio</label>
+                            <input type="text" id="profBio" placeholder="Tell other travelers about your travel style, hobbies, etc.">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Emergency Contact (Name & Phone)</label>
+                            <input type="text" id="profEmergency" placeholder="e.g. Jane Doe (Mom) - +91 98765 43211">
+                        </div>
+
+                        <div class="privacy-notice">
+                            <strong>🔒 Privacy Guarantee:</strong> Your Phone Number and Emergency Contact are completely hidden from the public. They will only be visible to other travelers after they join a shared trip with you.
+                        </div>
+
+                        <button type="submit" class="btn" style="margin-top: 2rem;">Save Changes</button>
+                    </form>
+                </div>
+
+                <!-- Right Column: Trustworthiness Panel -->
+                <div class="trust-panel">
+                    <h3 style="margin-bottom: 1.5rem; color: var(--primary); font-size: 1.5rem;">Profile Completeness</h3>
+
+                    <div class="trust-score-circle" id="lblTrustScore">0%</div>
+                    <div class="trust-score-label">Trust Score</div>
+
+                    <div class="trust-score-bar-wrapper">
+                        <div class="trust-score-bar-fill" id="pbTrustScore" style="width: 0%;"></div>
+                    </div>
+
+                    <div style="text-align: left; margin-bottom: 1.5rem; font-size: 0.95rem; color: var(--text-muted); line-height: 1.5;">
+                        <p style="margin-bottom: 0.5rem;"><strong>How your Trust Score is calculated:</strong></p>
+                        <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.35rem;">
+                            <li>Phone Number details (+25%)</li>
+                            <li>Age & Gender details (+30%)</li>
+                            <li>Current Residence details (+15%)</li>
+                            <li>Short Bio introduction (+15%)</li>
+                            <li>Emergency Contact details (+15%)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js?v=2"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!localStorage.getItem('token')) {
+                window.location.href = 'index.html';
+            } else {
+                document.getElementById('userName').innerText = 'Hi, ' + localStorage.getItem('name');
+                loadUserProfile();
+            }
+        });
+    </script>
+</body>
+</html>

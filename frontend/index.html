@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TripSync</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="auth-wrapper">
+        <div class="auth-card" id="authCard">
+            <div class="logo-container">
+                <img src="logo.png" alt="TripSync Logo">
+                <h1 id="authTitle">TripSync</h1>
+            </div>
+            
+            <form id="authForm">
+                <div class="input-group" id="nameGroup" style="display: none;">
+                    <label>Full Name</label>
+                    <input type="text" id="nameInput" placeholder="John Doe">
+                </div>
+                
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="emailInput" placeholder="john@example.com" required>
+                </div>
+                
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="passwordInput" placeholder="••••••••" required>
+                </div>
+                
+                <button type="submit" class="btn" id="submitBtn">Sign In</button>
+            </form>
+            
+            <div class="toggle-auth" id="toggleAuth">
+                Don't have an account? <span>Sign up</span>
+            </div>
+            <div id="authError" style="color: var(--danger); text-align: center; margin-top: 1rem; font-size: 0.875rem;"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

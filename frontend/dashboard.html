@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TripSync Lite - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <div class="sidebar-nav">
+            <div class="brand" onclick="window.location.reload()">
+                <img src="logo.png" alt="Logo">
+                <h1>TripSync</h1>
+            </div>
+            
+            <div style="flex:1;">
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.8rem; letter-spacing: 1px;">YOUR STATS</h4>
+                    <div style="margin-bottom: 1.5rem;">
+                        <span style="font-size: 0.875rem; color: var(--text-muted);">Total Budget</span><br>
+                        <span id="statTotalBudget" style="font-size: 1.75rem; font-weight: bold; color: var(--success);">₹0</span>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.875rem; color: var(--text-muted);">Pending Tasks</span><br>
+                        <span id="statPendingTasks" style="font-size: 1.75rem; font-weight: bold; color: var(--primary);">0</span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.8rem; letter-spacing: 1px; font-weight: 600; text-transform: uppercase;">Currency</h4>
+                    <div class="input-group" style="margin-bottom: 0;">
+                        <select id="currencySelector">
+                            <option value="INR">INR (₹)</option>
+                            <option value="USD">USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="GBP">GBP (£)</option>
+                            <option value="JPY">JPY (¥)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-user">
+                <span id="userName" style="display: block; margin-bottom: 1rem; font-weight: 600; color: var(--text);"></span>
+                <button class="btn" style="background: rgba(255,255,255,0.8); border: 1px solid var(--border); color: var(--primary); margin-bottom: 0.5rem; box-shadow: none;" onclick="window.location.href='profile.html'">My Profile</button>
+                <button class="btn" style="background: rgba(255,255,255,0.8); border: 1px solid rgba(21, 128, 61, 0.25); color: var(--danger); box-shadow: none;" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="stats-container">
+                <div class="stat-pill">
+                    <h3>Total Team Trips</h3>
+                    <div class="value" id="statTotalTrips">0</div>
+                </div>
+                <div class="stat-pill">
+                    <h3>Upcoming Trips</h3>
+                    <div class="value" id="statUpcomingTrips">0</div>
+                </div>
+            </div>
+
+            <div class="action-bar">
+                <button class="btn" style="width: auto; padding: 0.75rem 2rem;" onclick="openAddTripModal()">+ Create New Trip</button>
+                <span style="color: var(--text-muted); padding: 0 1rem; font-style: italic;">or</span>
+                <div class="join-trip-box">
+                    <input type="text" id="joinCodeInput" placeholder="Enter Join Code..." maxlength="6" style="text-transform: uppercase;">
+                    <button class="btn" style="width: auto;" onclick="joinTrip()">Join Team</button>
+                </div>
+            </div>
+
+            <h2 style="margin-bottom: 1.5rem; font-weight: 600;">Your Feed</h2>
+            <div class="trips-feed" id="tripsGrid">
+                <!-- Trip cards will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Trip Modal -->
+    <div class="modal" id="addTripModal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 1.5rem;">Create New Trip</h2>
+            <form id="addTripForm">
+                <div class="input-group">
+                    <label>Destination</label>
+                    <input type="text" id="tripDest" required>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <div class="input-group" style="flex: 1;">
+                        <label>Start Date</label>
+                        <input type="date" id="tripStart" required>
+                    </div>
+                    <div class="input-group" style="flex: 1;">
+                        <label>End Date</label>
+                        <input type="date" id="tripEnd" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label id="lblBudgetForm">Budget (₹)</label>
+                    <input type="number" id="tripBudget" required>
+                </div>
+                <div class="input-group">
+                    <label>Notes</label>
+                    <input type="text" id="tripNotes">
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button type="button" class="btn" style="background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(21, 128, 61, 0.25); color: var(--text-muted); box-shadow: none;" onclick="closeAddTripModal()">Cancel</button>
+                    <button type="submit" class="btn">Save Trip</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js?v=2"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!localStorage.getItem('token')) {
+                window.location.href = 'index.html';
+            } else {
+                document.getElementById('userName').innerText = 'Hi, ' + localStorage.getItem('name');
+                
+                // Initialize currency selector
+                const sel = document.getElementById('currencySelector');
+                const activeCurrency = localStorage.getItem('currency') || 'INR';
+                sel.value = activeCurrency;
+                
+                // Update budget label in form
+                const symbols = { 'INR': '₹', 'USD': '$', 'EUR': '€', 'GBP': '£', 'JPY': '¥' };
+                document.getElementById('lblBudgetForm').innerText = `Budget (${symbols[activeCurrency] || '₹'})`;
+                
+                // Handle currency changes
+                sel.addEventListener('change', (e) => {
+                    localStorage.setItem('currency', e.target.value);
+                    document.getElementById('lblBudgetForm').innerText = `Budget (${symbols[e.target.value] || '₹'})`;
+                    loadDashboardStats();
+                    loadTrips();
+                });
+
+                loadDashboardStats();
+                loadTrips();
+            }
+        });
+    </script>
+</body>
+</html>

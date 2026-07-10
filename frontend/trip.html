@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TripSync Lite - Trip Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+        .section-card {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+        .section-card h3 {
+            color: var(--primary);
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+        .section-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 1rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid rgba(21, 128, 61, 0.08);
+            transition: all 0.2s ease;
+        }
+        .list-item:hover {
+            transform: translateX(5px);
+            background: rgba(21, 128, 61, 0.05);
+            border-color: rgba(21, 128, 61, 0.2);
+        }
+        .list-item .actions button {
+            background: rgba(220, 38, 38, 0.06);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 0.4rem 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .list-item .actions button:hover {
+            background: var(--danger);
+            color: white;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 220px;
+            width: 220px;
+        }
+        @media (max-width: 1024px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <div class="sidebar-nav">
+            <div class="brand" onclick="window.location.href='dashboard.html'">
+                <img src="logo.png" alt="Logo">
+                <h1>TripSync</h1>
+            </div>
+            
+            <div style="flex:1;">
+                <div style="margin-bottom: 2rem; background: #ffffff; border: 1px solid var(--border); padding: 1.5rem; border-radius: 1.5rem; text-align: center; box-shadow: var(--shadow);">
+                    <span style="font-size: 0.75rem; color: var(--primary); text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Team Join Code</span><br>
+                    <span id="tripJoinCode" style="font-size: 2rem; font-family: monospace; font-weight: bold; color: var(--primary); margin-top: 0.5rem; display: block; background: #f8fafc; padding: 0.25rem; border-radius: 0.5rem; border: 1px dashed rgba(45, 90, 39, 0.3);">------</span>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Share this with friends</p>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.8rem; letter-spacing: 1px; font-weight: 600; text-transform: uppercase;">Currency</h4>
+                    <div class="input-group" style="margin-bottom: 0;">
+                        <select id="currencySelector">
+                            <option value="INR">INR (₹)</option>
+                            <option value="USD">USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="GBP">GBP (£)</option>
+                            <option value="JPY">JPY (¥)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-user">
+                <button class="btn" style="background: rgba(255,255,255,0.8); border: 1px solid var(--border); color: var(--primary); margin-bottom: 0.5rem; box-shadow: none;" onclick="window.location.href='profile.html'">My Profile</button>
+                <button class="btn" style="background: rgba(255,255,255,0.8); border: 1px solid rgba(21, 128, 61, 0.25); color: var(--primary); box-shadow: none;" onclick="window.location.href='dashboard.html'">← Dashboard</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div style="margin-bottom: 3rem;">
+                <h2 id="tripTitle" style="font-size: 3rem; font-weight: 800; line-height: 1.1; margin-bottom: 0.5rem; color: var(--text);">Loading Trip...</h2>
+                <p id="tripDates" style="color: var(--text-muted); font-size: 1.1rem; font-weight: 500;"></p>
+            </div>
+
+            <div class="details-grid">
+                <div class="main-column">
+                    <!-- Itinerary Section -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h3>Itinerary</h3>
+                            <button class="btn" style="width: auto; padding: 0.5rem 1rem;" onclick="openModal('itineraryModal')">+ Add</button>
+                        </div>
+                        <div id="itineraryList"></div>
+                    </div>
+
+                    <!-- Tasks Section -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h3>Travel Tasks</h3>
+                            <button class="btn" style="width: auto; padding: 0.5rem 1rem;" onclick="openModal('taskModal')">+ Add</button>
+                        </div>
+                        <div id="taskList"></div>
+                    </div>
+
+                    <!-- Expenses Section -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h3>Expenses</h3>
+                            <button class="btn" style="width: auto; padding: 0.5rem 1rem;" onclick="openModal('expenseModal')">+ Add</button>
+                        </div>
+                        <div id="expenseList"></div>
+                    </div>
+
+                    <!-- Splitwise Section -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h3>Team Finances (Splitwise)</h3>
+                            <button class="btn" style="width: auto; padding: 0.5rem 1rem; background: transparent; border: 1px solid var(--primary); color: var(--primary); box-shadow: none;" onclick="loadSplitwise()">Refresh</button>
+                        </div>
+                        <div id="splitwiseList" style="margin-top: 1rem; background: rgba(255,255,255,0.6); border: 1px solid var(--border); padding: 1.5rem; border-radius: 1.25rem;">
+                            <!-- Split data -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-column">
+                    <!-- Charts Section -->
+                    <div class="section-card">
+                        <h3>Budget vs Spent</h3>
+                        <div class="chart-container">
+                            <canvas id="budgetChart"></canvas>
+                        </div>
+                        <div style="margin-top: 1.5rem; text-align: center; font-size: 1.1rem;">
+                            Total Budget: <span id="lblBudget" style="color: var(--success); font-weight: bold;">$0</span><br>
+                            <span style="display:inline-block; margin-top:0.5rem;">Total Spent: <span id="lblSpent" style="color: var(--danger); font-weight: bold;">$0</span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="section-card">
+                        <h3>Expense Categories</h3>
+                        <div class="chart-container">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="section-card">
+                        <h3>Task Completion</h3>
+                        <div class="chart-container">
+                            <canvas id="taskChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Itinerary Modal -->
+    <div class="modal" id="itineraryModal">
+        <div class="modal-content">
+            <h2>Add Itinerary</h2>
+            <form id="formItinerary" style="margin-top: 1rem;">
+                <div class="input-group">
+                    <label>Day (e.g. Day 1)</label>
+                    <input type="text" id="itDay" required>
+                </div>
+                <div class="input-group">
+                    <label>Time</label>
+                    <input type="text" id="itTime" required>
+                </div>
+                <div class="input-group">
+                    <label>Activity</label>
+                    <input type="text" id="itActivity" required>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button type="button" class="btn" style="background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(21, 128, 61, 0.25); color: var(--text-muted); box-shadow: none;" onclick="closeModal('itineraryModal')">Cancel</button>
+                    <button type="submit" class="btn">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal" id="taskModal">
+        <div class="modal-content">
+            <h2>Add Task</h2>
+            <form id="formTask" style="margin-top: 1rem;">
+                <div class="input-group">
+                    <label>Task Title</label>
+                    <input type="text" id="tTitle" required>
+                </div>
+                <div class="input-group">
+                    <label>Priority</label>
+                    <select id="tPriority">
+                        <option>High</option>
+                        <option>Medium</option>
+                        <option>Low</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button type="button" class="btn" style="background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(21, 128, 61, 0.25); color: var(--text-muted); box-shadow: none;" onclick="closeModal('taskModal')">Cancel</button>
+                    <button type="submit" class="btn">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Expense Modal -->
+    <div class="modal" id="expenseModal">
+        <div class="modal-content">
+            <h2>Add Expense</h2>
+            <form id="formExpense" style="margin-top: 1rem;">
+                <div class="input-group">
+                    <label>Category</label>
+                    <select id="exCategory">
+                        <option>Flight</option>
+                        <option>Hotel</option>
+                        <option>Food</option>
+                        <option>Activities</option>
+                        <option>Transport</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label id="lblExpenseForm">Amount (₹)</label>
+                    <input type="number" id="exAmount" required>
+                </div>
+                <div class="input-group">
+                    <label>Date</label>
+                    <input type="date" id="exDate" required>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button type="button" class="btn" style="background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(21, 128, 61, 0.25); color: var(--text-muted); box-shadow: none;" onclick="closeModal('expenseModal')">Cancel</button>
+                    <button type="submit" class="btn">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Member Profile Modal -->
+    <div class="modal" id="memberProfileModal">
+        <div class="modal-content" style="max-width: 480px;">
+            <h2 id="mProfTitle" style="color: var(--primary); margin-bottom: 1.5rem; text-align: center;">Trust Profile</h2>
+            
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <div style="font-size: 2.2rem; font-weight: 800; color: var(--primary);" id="mProfScore">0%</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Trust Score</div>
+            </div>
+
+            <div style="background: rgba(13, 148, 136, 0.04); border: 1px solid var(--border); padding: 1.5rem; border-radius: 1.25rem; font-size: 0.95rem; margin-bottom: 2rem;">
+                <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; border-bottom: 1px solid rgba(13, 148, 136, 0.1); padding-bottom: 0.5rem;">
+                    <strong>Age:</strong> <span id="mProfAge">-</span>
+                </div>
+                <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; border-bottom: 1px solid rgba(13, 148, 136, 0.1); padding-bottom: 0.5rem;">
+                    <strong>Gender:</strong> <span id="mProfGender">-</span>
+                </div>
+                <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; border-bottom: 1px solid rgba(13, 148, 136, 0.1); padding-bottom: 0.5rem;">
+                    <strong>Residence:</strong> <span id="mProfResidence">-</span>
+                </div>
+                <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; border-bottom: 1px solid rgba(13, 148, 136, 0.1); padding-bottom: 0.5rem;">
+                    <strong>Phone Number:</strong> <span id="mProfPhone">-</span>
+                </div>
+                <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; border-bottom: 1px solid rgba(13, 148, 136, 0.1); padding-bottom: 0.5rem;">
+                    <strong>Emergency:</strong> <span id="mProfEmergency">-</span>
+                </div>
+                <div style="margin-bottom: 0.5rem;">
+                    <strong>Bio:</strong>
+                    <p id="mProfBio" style="color: var(--text-muted); font-style: italic; margin-top: 0.25rem; line-height: 1.4;">-</p>
+                </div>
+            </div>
+
+            <button class="btn" onclick="closeModal('memberProfileModal')">Close Profile</button>
+        </div>
+    </div>
+
+    <script src="app.js?v=2"></script>
+    <script>
+        window.onerror = function(msg, url, line) {
+            alert('Error: ' + msg + ' at ' + url + ':' + line);
+            return false;
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!localStorage.getItem('token')) {
+                window.location.href = 'index.html';
+            } else {
+                // Initialize currency selector
+                const sel = document.getElementById('currencySelector');
+                const activeCurrency = localStorage.getItem('currency') || 'INR';
+                sel.value = activeCurrency;
+                
+                // Update amount label in form
+                const symbols = { 'INR': '₹', 'USD': '$', 'EUR': '€', 'GBP': '£', 'JPY': '¥' };
+                document.getElementById('lblExpenseForm').innerText = `Amount (${symbols[activeCurrency] || '₹'})`;
+                
+                // Handle currency changes
+                sel.addEventListener('change', (e) => {
+                    localStorage.setItem('currency', e.target.value);
+                    document.getElementById('lblExpenseForm').innerText = `Amount (${symbols[e.target.value] || '₹'})`;
+                    initTripDetails();
+                });
+
+                initTripDetails();
+            }
+        });
+    </script>
+</body>
+</html>
